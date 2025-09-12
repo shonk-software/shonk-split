@@ -1,27 +1,38 @@
+use std::error::Error;
+use std::path::Path;
 use std::process::Command;
 
-use pdf_extract::extract_text;
 use tempfile::NamedTempFile;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let input_path = "samples/REWE-eBon.pdf";
-
-    // Create a temporary file for decrypted PDF
+/// Extracts text from a PDF, decrypting it with qpdf if needed.
+///
+/// Automatically uses a temporary file for the decrypted version.
+pub fn extract_text_from_pdf_with_qpdf<P: AsRef<Path>>(
+    input_pdf: P,
+) -> Result<String, Box<dyn Error>> {
     let temp_file = NamedTempFile::new()?;
-    let temp_path = temp_file.path().to_str().unwrap();
+    let temp_path = temp_file.path();
 
-    // Use qpdf to decrypt the file into the temp file
     let status = Command::new("qpdf")
-        .args(&["--decrypt", input_path, temp_path])
+        .args(&[
+            "--decrypt",
+            input_pdf.as_ref().to_str().unwrap(),
+            temp_path.to_str().unwrap(),
+        ])
         .status()?;
 
     if !status.success() {
         return Err("qpdf decryption failed".into());
     }
 
-    // Use pdf_extract to extract text
-    let text = extract_text(temp_path)?;
-    println!("Extracted Text:\n{}", text);
+    let text = pdf_extract::extract_text(temp_path)?;
 
-    Ok(())
+    Ok(text)
+}
+
+fn main() {
+    let pdf_path = "samples/REWE-eBon.pdf";
+
+    let extracted_text = extract_text_from_pdf_with_qpdf(pdf_path).unwrap();
+    println!("Extracted text:\n{}", extracted_text);
 }
