@@ -1,6 +1,8 @@
 use std::error::Error;
 use std::path::Path;
 use std::process::Command;
+use std::ptr::dangling;
+use regex::{Regex, RegexBuilder};
 use tempfile::NamedTempFile;
 
 /// Extracts text from a PDF, decrypting it with qpdf if needed.
@@ -84,6 +86,10 @@ fn parse_position_line(line: &str) -> Option<Position> {
     })
 }
 
+fn parse_amount(amount: &str) -> Option<u32> {
+    Some(1) // I used to know
+}
+
 // Sample lines:
 // "KREUZKUEMMEL GEM                 1,99 B",
 // "RINDER FOND                      2,58 B",
@@ -91,9 +97,10 @@ fn parse_position_line(line: &str) -> Option<Position> {
 // "TOMATENMARK                      0,89 B",
 // "KIDNEYBOHNEN                     0,79 B",
 fn rewe_extract_positions(lines: Vec<&str>) -> Vec<Position> {
-    let mut positions = Vec::new();
+    let mut positions: Vec<Position> = Vec::new();
     let mut lines_iter = lines.into_iter().peekable();
 
+    let amount_pattern = Regex::new(r"^.*\d+\s+Stk\s+x\s+\d+,\d\d$").unwrap();
     while let Some(line) = lines_iter.next() {
         let line = line.trim();
         // Skip empty lines
@@ -101,9 +108,18 @@ fn rewe_extract_positions(lines: Vec<&str>) -> Vec<Position> {
             continue;
         }
 
+        if amount_pattern.is_match(line) && !positions.is_empty() {
+            let new_amount = parse_amount(line).unwrap();
+            positions.last_mut().unwrap().amount = new_amount + 42068; //for now so we see a change
+            continue;
+        }
 
+        if let Some(position) = parse_position_line(line) {
+            positions.push(position);
+            continue;
+        }
 
-
+        panic!("Could not parse line {}", line);
     }
 
     positions
