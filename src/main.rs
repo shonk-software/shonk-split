@@ -1,8 +1,7 @@
 use std::error::Error;
 use std::path::Path;
 use std::process::Command;
-use std::ptr::dangling;
-use regex::{Regex, RegexBuilder};
+use regex::Regex;
 use tempfile::NamedTempFile;
 
 /// Extracts text from a PDF, decrypting it with qpdf if needed.
@@ -15,7 +14,7 @@ pub fn extract_text_from_pdf_with_qpdf<P: AsRef<Path>>(
     let temp_path = temp_file.path();
 
     let status = Command::new("qpdf")
-        .args(&[
+        .args([
             "--decrypt",
             input_pdf.as_ref().to_str().unwrap(),
             temp_path.to_str().unwrap(),
@@ -33,12 +32,12 @@ pub fn extract_text_from_pdf_with_qpdf<P: AsRef<Path>>(
 
 /// Extracts the lines containing positions from the REWE receipt text.
 pub fn rewe_extract_positions_lines(text: &str) -> Vec<&str> {
-    let lines = text.lines().into_iter();
+    let lines = text.lines();
 
     let lines = lines.skip_while(|line| line.trim() != "EUR").skip(1);
 
-    let positions = lines.take_while(|line| line.trim() != "--------------------------------------").collect();
-    positions
+    
+    lines.take_while(|line| line.trim() != "--------------------------------------").collect()
 }
 
 #[derive(Debug)]
@@ -54,7 +53,7 @@ fn get_price_indexes(line: &str) -> Option<(usize, usize)> {
     // ------------------- Extracting the price
     let end_index = *chars.iter()
         .rev()
-        .skip_while(|(_, c)| !c.is_digit(10))
+        .skip_while(|(_, c)| !c.is_ascii_digit())
         .next()
         .map(|(idx, _)| idx).unwrap();
 
@@ -77,7 +76,7 @@ fn parse_position_line(line: &str) -> Option<Position> {
     let price: f32 = price.parse().unwrap();
 
     // --------------------- Extracting the name of the product - shrimple now :shrimp:
-    let name = *&line[0..start_index].trim();
+    let name = line[0..start_index].trim();
 
     Some(Position {
         amount: 1,
@@ -100,12 +99,13 @@ fn parse_amount(amount: &str) -> Option<u32> {
 // "             2 Stk x    1,29",
 // "TOMATENMARK                      0,89 B",
 // "KIDNEYBOHNEN                     0,79 B",
+#[must_use]
 fn rewe_extract_positions(lines: Vec<&str>) -> Vec<Position> {
     let mut positions: Vec<Position> = Vec::new();
-    let mut lines_iter = lines.into_iter().peekable();
+    let lines_iter = lines.into_iter().peekable();
 
     let amount_pattern = Regex::new(r"^.*\d+\s+Stk\s+x\s+\d+,\d\d$").unwrap();
-    while let Some(line) = lines_iter.next() {
+    for line in lines_iter {
         let line = line.trim();
         // Skip empty lines
         if line.is_empty() {
