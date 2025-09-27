@@ -87,7 +87,11 @@ fn parse_position_line(line: &str) -> Option<Position> {
 }
 
 fn parse_amount(amount: &str) -> Option<u32> {
-    Some(1) // I used to know
+    let amount = amount.trim();
+    let split = amount.split_once(' ').unwrap();
+    let amount: u32 = split.0.parse().unwrap();
+
+    Some(amount)
 }
 
 // Sample lines:
@@ -110,7 +114,7 @@ fn rewe_extract_positions(lines: Vec<&str>) -> Vec<Position> {
 
         if amount_pattern.is_match(line) && !positions.is_empty() {
             let new_amount = parse_amount(line).unwrap();
-            positions.last_mut().unwrap().amount = new_amount + 42068; //for now so we see a change
+            positions.last_mut().unwrap().amount = new_amount;
             continue;
         }
 
