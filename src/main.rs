@@ -65,7 +65,7 @@ pub fn rewe_extract_positions(lines: Vec<&str>) -> Vec<Position> {
             }
 
             // Try to parse price
-            if let Ok(realprice) = f32::from_str(&tok.replace(',', ".")) {
+            if let Ok(realprice) = f32::from_str(&tok.replace(',', ".")) && price.is_none() {
                 price = Some(realprice);
                 continue;
             }
