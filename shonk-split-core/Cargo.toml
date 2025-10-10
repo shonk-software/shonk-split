@@ -1,0 +1,18 @@
+[package]
+name = "shonk-split-core"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+
+[[bin]]
+name = "shonk-split-core-bin"
+path = "src/main.rs"
+
+[dependencies]
+pdf-extract = "0.9.0"
+tempfile = "3.22.0"
+regex = "1.11.3"
+
+[dependencies.shonk-split-model]
+path = "../shonk-split-model"

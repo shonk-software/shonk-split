@@ -1,5 +1,5 @@
 use regex::Regex;
-use crate::Position;
+use shonk_split_model::Position;
 
 fn get_price_indexes(line: &str) -> Option<(usize, usize)> {
     let chars = line.char_indices().collect::<Vec<(usize, char)>>();

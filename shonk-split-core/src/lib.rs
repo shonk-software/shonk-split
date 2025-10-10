@@ -1,10 +1,9 @@
-mod extract;
+pub mod extract;
 
 use std::error::Error;
 use std::path::Path;
 use std::process::Command;
 use tempfile::NamedTempFile;
-use crate::extract::rewe::extract_positions_from_rewe_text;
 
 /// Extracts text from a PDF, decrypting it with qpdf if needed.
 ///
@@ -30,19 +29,4 @@ pub fn extract_text_from_pdf_with_qpdf<P: AsRef<Path>>(
     let text = pdf_extract::extract_text(temp_path)?;
 
     Ok(text)
-}
-
-#[derive(Debug)]
-struct Position {
-    name: String,
-    amount: u32,
-    price: f32,
-}
-
-fn main() {
-    let pdf_path = "samples/REWE-eBon.pdf";
-
-    let extracted_text = extract_text_from_pdf_with_qpdf(pdf_path).unwrap();
-    let extracted_positions = extract_positions_from_rewe_text(extracted_text.as_str());
-    println!("Positions: {extracted_positions:#?}");
 }
