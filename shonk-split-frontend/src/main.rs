@@ -1,4 +1,10 @@
+use std::cell::Ref;
+use dioxus::dioxus_core::internal::generational_box::GenerationalRef;
+use dioxus::html::a::position;
 use dioxus::prelude::*;
+use tracing::info;
+
+use shonk_split_model::Position;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
@@ -9,29 +15,58 @@ fn main() {
 }
 
 #[component]
-fn App() -> Element {
-    rsx! {
-        document::Link { rel: "icon", href: FAVICON }
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
-        Hero {}
+pub fn App() -> Element {
+    let mut positions = use_resource(|| async move {
+        reqwest::get("http://localhost:8080/rewe_data")
+            .await
+            .unwrap()
+            .json::<Vec<Position>>()
+            .await
+            .unwrap()
+    });
 
-    }
-}
+    // let positions = positions.read_unchecked().unwrap();
 
-#[component]
-pub fn Hero() -> Element {
+    // rsx! {
+    //     Testest {}
+
+        // for position in positions {
+        //
+        // }
+        // match &*positions.read_unchecked() {
+        //     Some(response)=> rsx!{
+        //         "hello full"
+        //     },
+        //     None => rsx! {
+        //         "hello empty"
+        //     },
+        // }
+
+    // }
     rsx! {
-        div {
-            id: "hero",
-            img { src: HEADER_SVG, id: "header" }
-            div { id: "links",
-                a { href: "https://dioxuslabs.com/learn/0.6/", "📚 Learn Dioxus" }
-                a { href: "https://dioxuslabs.com/awesome", "🚀 Awesome Dioxus" }
-                a { href: "https://github.com/dioxus-community/", "📡 Community Libraries" }
-                a { href: "https://github.com/DioxusLabs/sdk", "⚙️ Dioxus Development Kit" }
-                a { href: "https://marketplace.visualstudio.com/items?itemName=DioxusLabs.dioxus", "💫 VSCode Extension" }
-                a { href: "https://discord.gg/XgGxMSkvUM", "👋 Community Discord" }
+        div { class: "bg-red-100",
+            button {
+                onclick: move |_| info!("Clicked"),
+                "Click me!"
             }
+        }
+        br {}
+
+        p {"Dragons are cool!"} br {}
+
+        match &*positions.read_unchecked() {
+            Some(response)=> rsx!{
+                ul {
+                    for item in response {
+                        li {
+                            "{item:?}"
+                        }
+                    }
+                }
+            },
+            None => rsx! {
+                "hello empty"
+            },
         }
     }
 }
