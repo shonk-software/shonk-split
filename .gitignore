@@ -3,3 +3,5 @@
 /target
 
 /samples/*.pdf
+
+**/.DS_STORE
