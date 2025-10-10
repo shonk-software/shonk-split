@@ -3,5 +3,5 @@ resolver = "3"
 members = [
     "shonk-split-core",
     "shonk-split-model",
-    "shonk-split-backend",
+    "shonk-split-backend", "shonk-split-frontend",
 ]

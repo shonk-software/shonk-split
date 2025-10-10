@@ -1338,6 +1338,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "shonk-split-frontend"
+version = "0.1.0"
+
+[[package]]
 name = "shonk-split-model"
 version = "0.1.0"
 dependencies = [
