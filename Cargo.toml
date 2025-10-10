@@ -3,5 +3,17 @@ resolver = "3"
 members = [
     "shonk-split-core",
     "shonk-split-model",
-    "shonk-split-backend", "shonk-split-frontend",
+    "shonk-split-backend", "shonk-split-frontend", "shonk-split-frontend",
 ]
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
